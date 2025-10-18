@@ -1,4 +1,6 @@
 import { COLORS } from '@/constants/Colors'
+import { useSSO } from '@clerk/clerk-expo'
+import { OAuthStrategy } from '@clerk/types'
 import { AntDesign } from '@expo/vector-icons'
 import { Link } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
@@ -13,11 +15,32 @@ import {
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 
 export default function Index() {
+  const { startSSOFlow } = useSSO()
+
   const openLink = (url: string) => {
     WebBrowser.openBrowserAsync(url)
   }
 
-  const handleSocialLogin = (provider: string) => {}
+  const handleSocialLogin = async (provider: string) => {
+    try {
+      const { createdSessionId, setActive } = await startSSOFlow({
+        strategy: provider as OAuthStrategy,
+      })
+
+      if (createdSessionId) {
+        await setActive?.({
+          session: createdSessionId,
+          navigate: async ({ session }) => {
+            // console.log('NAVIGAte into the app')
+          },
+        })
+      } else {
+        console.error('No session created')
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   return (
     <KeyboardAvoidingView behavior='padding' style={styles.container}>
