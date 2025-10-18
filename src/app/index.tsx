@@ -1,6 +1,7 @@
 import { COLORS } from '@/constants/Colors'
 import { AntDesign } from '@expo/vector-icons'
 import { Link } from 'expo-router'
+import * as WebBrowser from 'expo-web-browser'
 import {
   Image,
   StyleSheet,
@@ -11,10 +12,10 @@ import {
 } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 
-// import { Redirect } from 'expo-router'
-
 export default function Index() {
-  // return <Redirect href='/(protected)/(tabs)/home' />
+  const openLink = (url: string) => {
+    WebBrowser.openBrowserAsync(url)
+  }
 
   const handleSocialLogin = (provider: string) => {}
 
@@ -74,6 +75,25 @@ export default function Index() {
           </TouchableOpacity>
         </Link>
       </View>
+
+      <View style={styles.footer}>
+        <Text style={styles.termsText}>
+          By continuing, you agree to our{' '}
+          <Text
+            style={styles.link}
+            onPress={() => openLink('https://www.instagram.com')}
+          >
+            Terms of Service
+          </Text>{' '}
+          and{' '}
+          <Text
+            style={styles.link}
+            onPress={() => openLink('https://www.facebook.com')}
+          >
+            Privacy Policy
+          </Text>
+        </Text>
+      </View>
     </KeyboardAvoidingView>
   )
 }
@@ -116,7 +136,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 100,
+    marginVertical: 30,
     gap: 8,
   },
   line: {
@@ -157,5 +177,18 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  footer: {
+    marginTop: 20,
+  },
+  termsText: {
+    fontSize: 12,
+    color: COLORS.textGray,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  link: {
+    color: COLORS.primary,
+    textDecorationLine: 'underline',
   },
 })
