@@ -24,7 +24,7 @@
       "package": "com.duck009.pocketclone"
     },
     "web": {
-      "output": "static",
+      "output": "server",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [

@@ -1,3 +1,4 @@
+import ArticlesFeed from '@/components/articles-feed'
 import { COLORS } from '@/constants/Colors'
 import { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -12,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated'
 
 export default function HomeScreen() {
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   const translateY1 = useSharedValue(0)
   const translateY2 = useSharedValue(0)
@@ -48,26 +49,36 @@ export default function HomeScreen() {
     }
   }, [isLoading])
 
-  return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      contentInsetAdjustmentBehavior='automatic'
-    >
-      <View style={styles.content}>
-        <View style={styles.loadingContainer}>
-          <View style={styles.loadingShapes}>
-            <Animated.View
-              style={[styles.shape, styles.circle, animatedStyle1]}
-            />
-            <Animated.View style={[styles.triangle, animatedStyle2]} />
-            <Animated.View
-              style={[styles.shape, styles.square, animatedStyle3]}
-            />
+  if (isLoading) {
+    return (
+      <ScrollView
+        contentContainerStyle={styles.container}
+        contentInsetAdjustmentBehavior='automatic'
+      >
+        <View style={styles.content}>
+          <View style={styles.loadingContainer}>
+            <View style={styles.loadingShapes}>
+              <Animated.View
+                style={[styles.shape, styles.circle, animatedStyle1]}
+              />
+              <Animated.View style={[styles.triangle, animatedStyle2]} />
+              <Animated.View
+                style={[styles.shape, styles.square, animatedStyle3]}
+              />
+            </View>
+            <Text style={styles.loadingText}>Loading...</Text>
           </View>
-          <Text style={styles.loadingText}>Loading...</Text>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    )
+  }
+
+  return (
+    <ArticlesFeed
+      maxItems={15}
+      feedSource='react-native'
+      title='React Native Articles'
+    />
   )
 }
 
