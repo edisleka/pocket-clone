@@ -1,7 +1,7 @@
 import { COLORS } from '@/constants/Colors'
+import migrations from '@/drizzle/migrations/migrations'
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo'
 import { tokenCache } from '@clerk/clerk-expo/token-cache'
-import migrations from '@drizzle/migrations'
 import { drizzle } from 'drizzle-orm/expo-sqlite'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin'
