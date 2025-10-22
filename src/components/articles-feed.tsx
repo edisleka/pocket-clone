@@ -1,6 +1,6 @@
 import { COLORS } from '@/constants/Colors'
 import * as Linking from 'expo-linking'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
@@ -138,15 +138,14 @@ export default function ArticlesFeed({
   const [articles, setArticles] = useState<RssArticle[]>([])
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    fetchFreshArticles()
-  }, [])
-
-  const fetchFreshArticles = async () => {
+  const fetchFreshArticles = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await fetch(`/api/rss-feed?url=${feedSource}`)
-      const result = await response.json()
+      const result = (await response.json()) as {
+        success: boolean
+        data: { items: RssArticle[] }
+      }
       // console.log('Fresh articles:', result)
       if (result.success) {
         setArticles(result.data.items)
@@ -156,7 +155,11 @@ export default function ArticlesFeed({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [feedSource])
+
+  useEffect(() => {
+    fetchFreshArticles()
+  }, [fetchFreshArticles])
 
   const handleSaveArticle = async (article: any) => {}
   const handleRefresh = async () => {}
