@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4003a808-1be6-4a49-9fe0-6a850ef186ab",
+  "id": "6ebbcdcc-e27a-4685-bab2-f3b1200859d4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "rss_articles": {

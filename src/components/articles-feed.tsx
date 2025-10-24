@@ -1,6 +1,13 @@
 import { COLORS } from '@/constants/Colors'
+import { RssArticle, rssArticles, savedItems } from '@/db/schema'
+import { useUser } from '@clerk/clerk-expo'
+import { desc, eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/expo-sqlite'
+import * as Crypto from 'expo-crypto'
 import * as Linking from 'expo-linking'
-import { useCallback, useEffect, useState } from 'react'
+import { useRouter } from 'expo-router'
+import { useSQLiteContext } from 'expo-sqlite'
+import { useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
@@ -20,17 +27,17 @@ interface ArticlesFeedProps {
   title?: string
 }
 
-interface RssArticle {
-  id: string
-  title: string
-  url: string
-  description: string
-  publishedDate: string
-  category: string
-  image: string
-  source: string
-  estimatedReadTime: number
-}
+// interface RssArticle {
+//   id: string
+//   title: string
+//   url: string
+//   description: string
+//   publishedDate: string
+//   category: string
+//   image: string
+//   source: string
+//   estimatedReadTime: number
+// }
 
 interface ArticlesCardProps {
   article: RssArticle
@@ -43,7 +50,7 @@ const ArticleCard = ({
   onSave,
   variant = 'compact',
 }: ArticlesCardProps) => {
-  const hasImage = article.image && article.image.length > 0
+  const hasImage = article.image_url && article.image_url.length > 0
 
   const handlePress = () => {
     if (article.url) {
@@ -55,7 +62,10 @@ const ArticleCard = ({
     return (
       <TouchableOpacity onPress={handlePress} style={styles.featuredCard}>
         {hasImage && (
-          <Image source={{ uri: article.image }} style={styles.featuredImage} />
+          <Image
+            source={{ uri: article.image_url || '' }}
+            style={styles.featuredImage}
+          />
         )}
         <View style={styles.featuredContent}>
           <Text numberOfLines={2} style={styles.featuredTitle}>
@@ -65,7 +75,7 @@ const ArticleCard = ({
             <View style={styles.featuredMeta}>
               <Text style={styles.featuredMetaText}>{article.source}</Text>
               <Text style={styles.featuredMetaText}>
-                - {article.estimatedReadTime}
+                - {article.estimated_read_time}
               </Text>
             </View>
             <TouchableOpacity
@@ -98,7 +108,7 @@ const ArticleCard = ({
           </View>
           {hasImage && (
             <Image
-              source={{ uri: article.image }}
+              source={{ uri: article.image_url || '' }}
               style={styles.compactImage}
             />
           )}
@@ -107,7 +117,7 @@ const ArticleCard = ({
           <View style={styles.featuredMeta}>
             <Text style={styles.featuredMetaText}>{article.source}</Text>
             <Text style={styles.featuredMetaText}>
-              - {article.estimatedReadTime}
+              - {article.estimated_read_time}
             </Text>
           </View>
           <TouchableOpacity
@@ -137,8 +147,72 @@ export default function ArticlesFeed({
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [articles, setArticles] = useState<RssArticle[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const db = useSQLiteContext()
+  const drizzleDb = drizzle(db)
+  const { user } = useUser()
+  const router = useRouter()
 
-  const fetchFreshArticles = useCallback(async () => {
+  const loadArticles = async () => {
+    try {
+      const cachedArticles = await drizzleDb
+        .select()
+        .from(rssArticles)
+        .orderBy(desc(rssArticles.published_date))
+        .limit(maxItems)
+
+      console.log('Cached articles:', cachedArticles)
+
+      if (cachedArticles.length > 0) {
+        setArticles(cachedArticles)
+        setIsLoading(false)
+      } else {
+        // Fetch fresh articles if no cached articles
+        try {
+          setIsLoading(true)
+          const response = await fetch(`/api/rss-feed?url=${feedSource}`)
+          const result = (await response.json()) as {
+            success: boolean
+            data: { items: RssArticle[] }
+          }
+          if (result.success) {
+            await drizzleDb.delete(rssArticles)
+
+            const articlesToInsert = result.data.items.map((item: any) => ({
+              id: Crypto.randomUUID(),
+              title: item.title,
+              url: item.url,
+              description: item.description,
+              published_date: item.publishedDate,
+              author: item.author,
+              category: item.category,
+              image_url: item.image,
+              source: item.source,
+              estimated_read_time: item.estimatedReadTime,
+              feed_url: feedSource,
+            }))
+
+            await drizzleDb.insert(rssArticles).values(articlesToInsert as any)
+
+            // Reload articles after inserting
+            const newCachedArticles = await drizzleDb
+              .select()
+              .from(rssArticles)
+              .orderBy(desc(rssArticles.published_date))
+              .limit(maxItems)
+            setArticles(newCachedArticles)
+          }
+        } catch (error) {
+          console.error('Error fetching fresh articles:', error)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading articles:', error)
+    }
+  }
+
+  const fetchFreshArticles = async () => {
     try {
       setIsLoading(true)
       const response = await fetch(`/api/rss-feed?url=${feedSource}`)
@@ -146,23 +220,90 @@ export default function ArticlesFeed({
         success: boolean
         data: { items: RssArticle[] }
       }
-      // console.log('Fresh articles:', result)
       if (result.success) {
-        setArticles(result.data.items)
+        await drizzleDb.delete(rssArticles)
+
+        const articlesToInsert = result.data.items.map((item: any) => ({
+          id: Crypto.randomUUID(),
+          title: item.title,
+          url: item.url,
+          description: item.description,
+          published_date: item.publishedDate,
+          author: item.author,
+          category: item.category,
+          image_url: item.image,
+          source: item.source,
+          estimated_read_time: item.estimatedReadTime,
+          feed_url: feedSource,
+        }))
+
+        await drizzleDb.insert(rssArticles).values(articlesToInsert as any)
+
+        // Reload articles after inserting
+        const newCachedArticles = await drizzleDb
+          .select()
+          .from(rssArticles)
+          .orderBy(desc(rssArticles.published_date))
+          .limit(maxItems)
+        setArticles(newCachedArticles)
       }
     } catch (error) {
       console.error('Error fetching fresh articles:', error)
     } finally {
       setIsLoading(false)
+      setIsRefreshing(false)
     }
-  }, [feedSource])
+  }
 
   useEffect(() => {
-    fetchFreshArticles()
-  }, [fetchFreshArticles])
+    loadArticles()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  const handleSaveArticle = async (article: any) => {}
-  const handleRefresh = async () => {}
+  const handleRefresh = async () => {
+    setIsRefreshing(true)
+    fetchFreshArticles()
+  }
+
+  const handleSaveArticle = async (article: RssArticle) => {
+    // console.log('Saving article:', article)
+    try {
+      const existing = await drizzleDb
+        .select()
+        .from(savedItems)
+        .where(eq(savedItems.url, article.url))
+      console.log('Existing article:', existing)
+
+      if (existing.length > 0) {
+        console.log('Article already saved')
+        return
+      }
+
+      const response = await fetch('/api/parse-url', {
+        method: 'POST',
+        body: JSON.stringify({ url: article.url }),
+      })
+      const result = (await response.json()) as { data: { content: string } }
+      console.log('Result:', result)
+
+      await drizzleDb.insert(savedItems).values({
+        id: Crypto.randomUUID(),
+        url: article.url,
+        title: article.title,
+        excerpt: article.description,
+        image_url: article.image_url,
+        domain: new URL(article.url).hostname,
+        reading_time: article.estimated_read_time,
+        user_id: user?.id || '1',
+        parsing_status: 'parsed',
+        content: result.data.content,
+      })
+
+      router.push('/(protected)/(modal)/success' as any)
+    } catch (error) {
+      console.error('Error saving article:', error)
+    }
+  }
 
   if (isLoading || articles.length === 0) {
     return (

@@ -1,7 +1,7 @@
 import { COLORS } from '@/constants/Colors'
-import migrations from '@/drizzle/migrations/migrations'
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo'
 import { tokenCache } from '@clerk/clerk-expo/token-cache'
+import migrations from '@drizzle/migrations'
 import { drizzle } from 'drizzle-orm/expo-sqlite'
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator'
 import { useDrizzleStudio } from 'expo-drizzle-studio-plugin'
@@ -33,7 +33,12 @@ const RootLayout = () => {
   const db = drizzle(expoDb)
   const { success, error } = useMigrations(db, migrations)
 
-  console.log(success, error)
+  // Log migration status but don't crash the app
+  if (error) {
+    console.warn('Migration warning (tables may already exist):', error.message)
+  } else if (success) {
+    console.log('Migrations completed successfully')
+  }
 
   return (
     <ClerkProvider tokenCache={tokenCache}>

@@ -31,7 +31,8 @@
       "@services/*": ["./src/services/*"],
       "@constants/*": ["./src/constants/*"],
       "@fonts/*": ["./assets/fonts/*"],
-      "@drizzle/*": ["./src/drizzle/*"]
+      "@drizzle/*": ["./src/drizzle/*"],
+      "@db/*": ["./src/db/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
