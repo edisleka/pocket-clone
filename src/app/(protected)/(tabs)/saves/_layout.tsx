@@ -1,5 +1,7 @@
 import { COLORS } from '@constants/Colors'
+import Ionicons from '@expo/vector-icons/build/Ionicons'
 import { Stack } from 'expo-router'
+import { TouchableOpacity } from 'react-native'
 
 export default function SavesLayout() {
   return (
@@ -10,6 +12,11 @@ export default function SavesLayout() {
           title: 'Saves',
           headerLargeTitle: true,
           headerLargeTitleShadowVisible: false,
+          headerRight: () => (
+            <TouchableOpacity>
+              <Ionicons name='add' size={24} color={COLORS.textDark} />
+            </TouchableOpacity>
+          ),
         }}
       />
     </Stack>
