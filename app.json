@@ -42,6 +42,7 @@
         }
       ],
       "expo-secure-store",
+      "react-native-legal",
       "expo-sqlite",
       [
         "@sentry/react-native/expo",
