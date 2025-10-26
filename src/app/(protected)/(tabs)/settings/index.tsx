@@ -111,14 +111,16 @@ export default function SettingsScreen() {
             />
           </View>
           <View style={styles.divider} />
-          <TouchableOpacity style={styles.listItem}>
-            <Text style={[styles.itemText]}>App Icon</Text>
-            <Ionicons
-              name='chevron-forward'
-              size={22}
-              color={COLORS.textDark}
-            />
-          </TouchableOpacity>
+          <Link href='/settings/icon' asChild>
+            <TouchableOpacity style={styles.listItem}>
+              <Text style={[styles.itemText]}>App Icon</Text>
+              <Ionicons
+                name='chevron-forward'
+                size={22}
+                color={COLORS.textDark}
+              />
+            </TouchableOpacity>
+          </Link>
         </View>
       </View>
       <View style={styles.section}>

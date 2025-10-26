@@ -12,6 +12,14 @@ export default function SettingsLayout() {
           headerLargeTitleShadowVisible: false,
         }}
       />
+      <Stack.Screen
+        name='icon'
+        options={{
+          title: 'App Icon',
+          headerLargeTitle: true,
+          headerLargeTitleShadowVisible: false,
+        }}
+      />
     </Stack>
   )
 }

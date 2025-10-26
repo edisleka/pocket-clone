@@ -51,6 +51,25 @@
           "project": "pocket-video",
           "organization": "edis-leka"
         }
+      ],
+      "expo-dynamic-app-icon",
+      [
+        "expo-dynamic-app-icon",
+        {
+          "default": {
+            // icon name
+            "image": "./assets/images/icon.png", // icon path
+            "prerendered": true // for ios UIPrerenderedIcon option
+          },
+          "dark": {
+            "image": "./assets/images/icon-dark.png",
+            "prerendered": true
+          },
+          "mono": {
+            "image": "./assets/images/icon-mono.png",
+            "prerendered": true
+          }
+        }
       ]
     ],
     "experiments": {
