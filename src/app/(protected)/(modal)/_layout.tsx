@@ -17,6 +17,20 @@ export default function ModalLayout() {
           },
         }}
       />
+      <Stack.Screen
+        name='add-url'
+        options={{
+          // presentation: 'formSheet',
+          headerShown: false,
+          sheetAllowedDetents: [0.5, 1],
+          sheetGrabberVisible: true,
+          headerShadowVisible: false,
+          title: '',
+          contentStyle: {
+            height: '100%',
+          },
+        }}
+      />
     </Stack>
   )
 }

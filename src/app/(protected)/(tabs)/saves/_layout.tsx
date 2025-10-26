@@ -1,6 +1,6 @@
 import { COLORS } from '@constants/Colors'
 import Ionicons from '@expo/vector-icons/build/Ionicons'
-import { Stack } from 'expo-router'
+import { Link, Stack } from 'expo-router'
 import { TouchableOpacity } from 'react-native'
 
 export default function SavesLayout() {
@@ -13,9 +13,11 @@ export default function SavesLayout() {
           headerLargeTitle: true,
           headerLargeTitleShadowVisible: false,
           headerRight: () => (
-            <TouchableOpacity>
-              <Ionicons name='add' size={24} color={COLORS.textDark} />
-            </TouchableOpacity>
+            <Link href='/(protected)/(modal)/add-url' asChild>
+              <TouchableOpacity>
+                <Ionicons name='add' size={24} color={COLORS.textDark} />
+              </TouchableOpacity>
+            </Link>
           ),
         }}
       />
