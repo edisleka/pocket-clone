@@ -2,9 +2,11 @@ import { COLORS } from '@/constants/Colors'
 import { useSSO } from '@clerk/clerk-expo'
 import { OAuthStrategy } from '@clerk/types'
 import { AntDesign } from '@expo/vector-icons'
+import * as Sentry from '@sentry/react-native'
 import { Link } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import {
+  Button,
   Image,
   StyleSheet,
   Text,
@@ -116,6 +118,12 @@ export default function Index() {
             Privacy Policy
           </Text>
         </Text>
+        <Button
+          title='Try!'
+          onPress={() => {
+            Sentry.captureException(new Error('First error'))
+          }}
+        />
       </View>
     </KeyboardAvoidingView>
   )
